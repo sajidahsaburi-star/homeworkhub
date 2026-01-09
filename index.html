@@ -337,7 +337,20 @@
 
                                 {/* Task List */}
                                 <div className="space-y-3">
-                                    {tasks.map(task => {
+                                    {tasks
+                                        .sort((a, b) => {
+                                            // Priority order: high (3) > medium (2) > low (1)
+                                            const priorityOrder = { high: 3, medium: 2, low: 1 };
+                                            const priorityDiff = priorityOrder[b.priority] - priorityOrder[a.priority];
+                                            
+                                            // If same priority, sort by due date (earliest first)
+                                            if (priorityDiff === 0) {
+                                                return new Date(a.dueDate) - new Date(b.dueDate);
+                                            }
+                                            
+                                            return priorityDiff;
+                                        })
+                                        .map(task => {
                                         const daysUntil = getDaysUntil(task.dueDate);
                                         const isOverdue = daysUntil < 0 && !task.completed;
                                         const isDueSoon = daysUntil <= 2 && daysUntil >= 0 && !task.completed;
@@ -357,6 +370,13 @@
                                                         <div className="flex items-center gap-2 mb-1">
                                                             <span className={`${getSubjectColor(task.subject)} text-white text-xs px-2 py-1 rounded-full`}>
                                                                 {task.subject}
+                                                            </span>
+                                                            <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                                                                task.priority === 'high' ? 'bg-red-100 text-red-700' :
+                                                                task.priority === 'medium' ? 'bg-yellow-100 text-yellow-700' :
+                                                                'bg-green-100 text-green-700'
+                                                            }`}>
+                                                                {task.priority.toUpperCase()}
                                                             </span>
                                                             {task.completed && (
                                                                 <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full flex items-center gap-1">
